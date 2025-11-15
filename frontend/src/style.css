@@ -1,0 +1,52 @@
+body {
+    font-family: sans-serif;
+    margin: 0;
+    background-color: #f0f2f5;
+}
+
+h1, h2 {
+    text-align: center;
+    color: #333;
+}
+
+#dashboard {
+    display: flex;
+    padding: 20px;
+}
+
+#video-streams {
+    flex: 2;
+    padding: 20px;
+    background-color: white;
+    margin-right: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#data {
+    flex: 1;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#heatmap {
+    width: 100%;
+    height: 200px;
+    background-color: #eee;
+    border-radius: 4px;
+    margin-top: 10px;
+    overflow: auto;
+}
+
+#snapshots {
+    margin-top: 20px;
+}
+
+.snapshot {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
