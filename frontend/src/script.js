@@ -1,34 +1,52 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // DOM Element References
+    // --- DOM Element References ---
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const body = document.body;
     const totalPeopleSpan = document.getElementById('total-people');
     const peopleByRoleList = document.getElementById('people-by-role');
     const heatmapContainer = document.getElementById('heatmap-container');
     const productionChartCtx = document.getElementById('productionChart').getContext('2d');
 
+    // --- Theme Management ---
+    const currentTheme = localStorage.getItem('theme');
+    if (currentTheme === 'dark') {
+        body.classList.add('dark-mode');
+    }
+
+    themeToggleBtn.addEventListener('click', function() {
+        body.classList.toggle('dark-mode');
+        let theme = 'light';
+        if (body.classList.contains('dark-mode')) {
+            theme = 'dark';
+        }
+        localStorage.setItem('theme', theme);
+        updateChartTheme(); // Update chart colors on theme change
+    });
+
     // --- Chart.js Initialization ---
     const productionChart = new Chart(productionChartCtx, {
         type: 'line',
-        data: {
-            labels: [],
-            datasets: [{
-                label: 'Worker Activity',
-                data: [],
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 2,
-                tension: 0.1
-            }]
-        },
+        data: { labels: [], datasets: [{ label: 'Worker Activity', data: [] }] },
         options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            },
             responsive: true,
             maintainAspectRatio: false
         }
     });
+
+    function updateChartTheme() {
+        const isDarkMode = body.classList.contains('dark-mode');
+        const textColor = isDarkMode ? '#e0e0e0' : '#333';
+        const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+
+        productionChart.options.scales.x.ticks.color = textColor;
+        productionChart.options.scales.y.ticks.color = textColor;
+        productionChart.options.scales.x.grid.color = gridColor;
+        productionChart.options.scales.y.grid.color = gridColor;
+        productionChart.options.plugins.legend.labels.color = textColor;
+        productionChart.data.datasets[0].borderColor = isDarkMode ? '#4bc0c0' : 'rgba(75, 192, 192, 1)';
+        productionChart.data.datasets[0].backgroundColor = isDarkMode ? 'rgba(75, 192, 192, 0.5)' : 'rgba(75, 192, 192, 0.2)';
+        productionChart.update();
+    }
 
     // --- Heatmap Initialization ---
     const heatmapInstance = h337.create({
@@ -37,44 +55,32 @@ document.addEventListener('DOMContentLoaded', function() {
         maxOpacity: .8
     });
 
+    // --- Data Fetching ---
     function updateLiveStatus() {
-        // Fetch and update live personnel data
-        fetch('/api/status')
-            .then(response => response.json())
-            .then(data => {
-                totalPeopleSpan.textContent = data.total_people;
-                peopleByRoleList.innerHTML = '';
-                for (const role in data.people_by_role) {
-                    const listItem = document.createElement('li');
-                    listItem.textContent = `${role}: ${data.people_by_role[role]}`;
-                    peopleByRoleList.appendChild(listItem);
-                }
-            })
-            .catch(error => console.error('Error fetching status:', error));
+        fetch('/api/status').then(res => res.json()).then(data => {
+            totalPeopleSpan.textContent = data.total_people;
+            peopleByRoleList.innerHTML = '';
+            for (const role in data.people_by_role) {
+                const li = document.createElement('li');
+                li.textContent = `${role}: ${data.people_by_role[role]}`;
+                peopleByRoleList.appendChild(li);
+            }
+        }).catch(err => console.error('Error fetching status:', err));
 
-        // Fetch and update live heatmap data
-        fetch('/api/heatmap')
-            .then(response => response.json())
-            .then(data => {
-                heatmapInstance.setData({ max: 10, data: data.heatmap_data });
-            })
-            .catch(error => console.error('Error fetching heatmap:', error));
+        fetch('/api/heatmap').then(res => res.json()).then(data => {
+            heatmapInstance.setData({ max: 10, data: data.heatmap_data });
+        }).catch(err => console.error('Error fetching heatmap:', err));
     }
 
     function initializeDashboard() {
-        // Fetch the historical production data once to populate the chart
-        fetch('/api/production_data')
-            .then(response => response.json())
-            .then(data => {
-                productionChart.data.labels = data.labels;
-                productionChart.data.datasets[0].data = data.data;
-                productionChart.update();
-            })
-            .catch(error => console.error('Error fetching production data:', error));
+        fetch('/api/production_data').then(res => res.json()).then(data => {
+            productionChart.data.labels = data.labels;
+            productionChart.data.datasets[0].data = data.data;
+            updateChartTheme(); // Initial theme setting for chart
+        }).catch(err => console.error('Error fetching production data:', err));
 
-        // Fetch live data immediately, then set an interval
         updateLiveStatus();
-        setInterval(updateLiveStatus, 5000); // Refresh every 5 seconds
+        setInterval(updateLiveStatus, 5000);
     }
 
     initializeDashboard();
