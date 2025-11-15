@@ -11,7 +11,15 @@
     <div id="dashboard">
         <div id="video-streams">
             <h2>Live Streams</h2>
-            <!-- Video streams will be added here -->
+            <div class="video-placeholder">
+                <div class="video-label">Camera 01 - Entrance</div>
+            </div>
+            <div class="video-placeholder">
+                <div class="video-label">Camera 02 - 2nd Floor</div>
+            </div>
+             <div class="video-placeholder">
+                <div class="video-label">Camera 03 - 360 View</div>
+            </div>
         </div>
         <div id="data">
             <h2>Real-time Data</h2>
@@ -21,7 +29,7 @@
                 <!-- Role data will be added here -->
             </ul>
             <h2>Activity Heatmap</h2>
-            <div id="heatmap">
+            <div id="heatmap-container">
                 <!-- Heatmap will be rendered here -->
             </div>
             <h2>Hourly Snapshots</h2>
@@ -30,6 +38,7 @@
             </div>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/heatmap.js@2.0.5/build/heatmap.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
