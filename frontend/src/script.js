@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // --- Configuration ---
+    const API_BASE_URL = 'http://localhost:8000';
+
     // --- DOM Element References ---
     const themeToggleBtn = document.getElementById('theme-toggle');
     const body = document.body;
@@ -20,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
             theme = 'dark';
         }
         localStorage.setItem('theme', theme);
-        updateChartTheme(); // Update chart colors on theme change
+        updateChartTheme();
     });
 
     // --- Chart.js Initialization ---
@@ -57,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- Data Fetching ---
     function updateLiveStatus() {
-        fetch('/api/status').then(res => res.json()).then(data => {
+        fetch(`${API_BASE_URL}/api/status`).then(res => res.json()).then(data => {
             totalPeopleSpan.textContent = data.total_people;
             peopleByRoleList.innerHTML = '';
             for (const role in data.people_by_role) {
@@ -67,16 +70,16 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }).catch(err => console.error('Error fetching status:', err));
 
-        fetch('/api/heatmap').then(res => res.json()).then(data => {
+        fetch(`${API_BASE_URL}/api/heatmap`).then(res => res.json()).then(data => {
             heatmapInstance.setData({ max: 10, data: data.heatmap_data });
         }).catch(err => console.error('Error fetching heatmap:', err));
     }
 
     function initializeDashboard() {
-        fetch('/api/production_data').then(res => res.json()).then(data => {
+        fetch(`${API_BASE_URL}/api/production_data`).then(res => res.json()).then(data => {
             productionChart.data.labels = data.labels;
             productionChart.data.datasets[0].data = data.data;
-            updateChartTheme(); // Initial theme setting for chart
+            updateChartTheme();
         }).catch(err => console.error('Error fetching production data:', err));
 
         updateLiveStatus();
