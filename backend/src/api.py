@@ -35,16 +35,13 @@ def generate_simulated_data():
     detected_roles = {"engineer": 0, "worker": 0, "supervisor": 0}
     locations = []
 
-    # Ensure at least one supervisor and engineer during work hours
     if multiplier > 0.1:
         detected_roles["supervisor"] = random.randint(1, 2)
         detected_roles["engineer"] = 1
 
-    # Populate the rest with workers
     remaining_people = num_people - sum(detected_roles.values())
     detected_roles["worker"] = max(0, remaining_people)
 
-    # Generate locations for all people
     for role, count in detected_roles.items():
         for _ in range(count):
             locations.append({
@@ -74,14 +71,24 @@ def get_heatmap():
 
 @router.get("/production_data")
 def get_production_data():
-    """Returns a full day's simulated production data for the chart."""
-    labels = [f"{hour}:00" for hour in range(8, 18)]
-    # Simulate a typical productivity curve for the day
-    production_values = [10, 15, 22, 25, 12, 28, 26, 23, 20, 15]
-    return {
-        "labels": labels,
-        "data": production_values
-    }
+    """Returns simulated production data for the chart, dynamically up to the current hour."""
+    now = datetime.datetime.now()
+    current_hour = now.hour
 
-# Note: The snapshot functionality has been removed for simplicity in this revision,
-# as the new simulation provides a more dynamic "live" view.
+    full_day_labels = [f"{hour}:00" for hour in range(8, 18)]
+    full_day_values = [10, 15, 22, 25, 12, 28, 26, 23, 20, 15]
+
+    start_hour = 8
+    end_hour = 17
+
+    if current_hour < start_hour:
+        hours_to_show = 0
+    elif current_hour > end_hour:
+        hours_to_show = len(full_day_values)
+    else:
+        hours_to_show = current_hour - start_hour + 1
+
+    return {
+        "labels": full_day_labels[:hours_to_show],
+        "data": full_day_values[:hours_to_show]
+    }
